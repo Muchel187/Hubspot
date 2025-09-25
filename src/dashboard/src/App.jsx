@@ -25,12 +25,12 @@ import {
   KeyIcon
 } from '@heroicons/react/24/outline';
 
-// Import HubSpot API
+// Import HubSpot API and OAuth
 import hubspotAPI from './hubspotAPI';
+import HubSpotOAuth from './HubSpotOAuth';
 
 // Check if we're in mock mode or live mode
 const API_MODE = import.meta.env.VITE_API_MODE || 'mock';
-const isLiveMode = API_MODE === 'live' && import.meta.env.VITE_HUBSPOT_ACCESS_TOKEN;
 
 // ==================== MOCK DATA ====================
 const mockCandidates = [
@@ -1314,6 +1314,10 @@ const App = () => {
   const [currentView, setCurrentView] = useState('dashboard');
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
+  const [isHubSpotConnected, setIsHubSpotConnected] = useState(false);
+
+  // Check if we're in live mode with HubSpot
+  const isLiveMode = API_MODE === 'live' && isHubSpotConnected;
 
   const handleNavigation = (view) => {
     setCurrentView(view);

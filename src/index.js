@@ -1,10 +1,12 @@
 /**
  * HubSpot Integration für NOBA ATS
- * Main entry point for HubSpot project
+ * Main entry point for HubSpot project with OAuth 2.0
  */
 
 const express = require('express');
 const axios = require('axios');
+const cors = require('cors');
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -13,9 +15,21 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({
+  origin: process.env.DASHBOARD_URL || 'http://localhost:5173',
+  credentials: true
+}));
+
+// Import OAuth router
+const oauthRouter = require('./auth/oauth');
+app.use('/auth', oauthRouter);
+
+// Serve dashboard as static files in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'dashboard/dist')));
+}
 
 // HubSpot Configuration
-const HUBSPOT_API_KEY = process.env.HUBSPOT_API_KEY;
 const HUBSPOT_BASE_URL = 'https://api.hubapi.com';
 
 // Health check endpoint
@@ -64,9 +78,19 @@ app.post('/api/webhook', async (req, res) => {
 // Get all contacts
 app.get('/api/contacts', async (req, res) => {
   try {
+    // Get access token from OAuth store
+    const tokenStore = oauthRouter.getTokenStore();
+    const portalIds = Object.keys(tokenStore);
+
+    if (portalIds.length === 0) {
+      return res.status(401).json({ error: 'No authenticated HubSpot account' });
+    }
+
+    const accessToken = tokenStore[portalIds[0]].accessToken;
+
     const response = await axios.get(`${HUBSPOT_BASE_URL}/crm/v3/objects/contacts`, {
       headers: {
-        'Authorization': `Bearer ${HUBSPOT_API_KEY}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
       params: {
@@ -85,6 +109,16 @@ app.get('/api/contacts', async (req, res) => {
 // Create a new contact
 app.post('/api/contacts', async (req, res) => {
   try {
+    // Get access token from OAuth store
+    const tokenStore = oauthRouter.getTokenStore();
+    const portalIds = Object.keys(tokenStore);
+
+    if (portalIds.length === 0) {
+      return res.status(401).json({ error: 'No authenticated HubSpot account' });
+    }
+
+    const accessToken = tokenStore[portalIds[0]].accessToken;
+
     const { firstname, lastname, email, phone, jobtitle, skills } = req.body;
 
     const response = await axios.post(
@@ -101,7 +135,7 @@ app.post('/api/contacts', async (req, res) => {
       },
       {
         headers: {
-          'Authorization': `Bearer ${HUBSPOT_API_KEY}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         }
       }
@@ -117,9 +151,19 @@ app.post('/api/contacts', async (req, res) => {
 // Get all deals (jobs)
 app.get('/api/deals', async (req, res) => {
   try {
+    // Get access token from OAuth store
+    const tokenStore = oauthRouter.getTokenStore();
+    const portalIds = Object.keys(tokenStore);
+
+    if (portalIds.length === 0) {
+      return res.status(401).json({ error: 'No authenticated HubSpot account' });
+    }
+
+    const accessToken = tokenStore[portalIds[0]].accessToken;
+
     const response = await axios.get(`${HUBSPOT_BASE_URL}/crm/v3/objects/deals`, {
       headers: {
-        'Authorization': `Bearer ${HUBSPOT_API_KEY}`,
+        'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json'
       },
       params: {
@@ -138,6 +182,16 @@ app.get('/api/deals', async (req, res) => {
 // Create a new deal (job)
 app.post('/api/deals', async (req, res) => {
   try {
+    // Get access token from OAuth store
+    const tokenStore = oauthRouter.getTokenStore();
+    const portalIds = Object.keys(tokenStore);
+
+    if (portalIds.length === 0) {
+      return res.status(401).json({ error: 'No authenticated HubSpot account' });
+    }
+
+    const accessToken = tokenStore[portalIds[0]].accessToken;
+
     const { dealname, amount, description, requirements, location } = req.body;
 
     const response = await axios.post(
@@ -153,7 +207,7 @@ app.post('/api/deals', async (req, res) => {
       },
       {
         headers: {
-          'Authorization': `Bearer ${HUBSPOT_API_KEY}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         }
       }
@@ -169,6 +223,16 @@ app.post('/api/deals', async (req, res) => {
 // Associate contact with deal
 app.post('/api/associations', async (req, res) => {
   try {
+    // Get access token from OAuth store
+    const tokenStore = oauthRouter.getTokenStore();
+    const portalIds = Object.keys(tokenStore);
+
+    if (portalIds.length === 0) {
+      return res.status(401).json({ error: 'No authenticated HubSpot account' });
+    }
+
+    const accessToken = tokenStore[portalIds[0]].accessToken;
+
     const { contactId, dealId } = req.body;
 
     const response = await axios.put(
@@ -176,7 +240,7 @@ app.post('/api/associations', async (req, res) => {
       {},
       {
         headers: {
-          'Authorization': `Bearer ${HUBSPOT_API_KEY}`,
+          'Authorization': `Bearer ${accessToken}`,
           'Content-Type': 'application/json'
         }
       }
