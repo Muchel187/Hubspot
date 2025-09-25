@@ -1,28 +1,41 @@
 {
-  "name": "noba-hubspot-integration",
+  "name": "noba-hubspot-ats",
   "version": "1.0.0",
-  "description": "HubSpot CRM integration for NOBA Experts ATS",
+  "description": "Complete ATS Dashboard with HubSpot CRM integration for NOBA Experts",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:dashboard\"",
+    "dev:server": "nodemon src/index.js",
+    "dev:dashboard": "cd src/dashboard && npm run dev",
+    "build": "cd src/dashboard && npm run build",
+    "build:all": "npm run build && npm run build:server",
+    "build:server": "echo 'Server ready'",
+    "install:all": "npm install && cd src/dashboard && npm install",
     "deploy": "hs upload --portal=production"
   },
   "dependencies": {
     "@hubspot/api-client": "^11.0.0",
     "express": "^4.18.2",
     "axios": "^1.6.0",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5",
+    "sqlite3": "^5.1.6",
+    "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
     "@hubspot/cli": "^5.0.0",
-    "nodemon": "^3.0.1"
+    "nodemon": "^3.0.1",
+    "concurrently": "^8.2.0"
   },
   "keywords": [
     "hubspot",
     "crm",
     "ats",
-    "recruitment"
+    "recruitment",
+    "dashboard",
+    "react",
+    "vite"
   ],
   "author": "NOBA Experts GmbH",
   "license": "MIT"
