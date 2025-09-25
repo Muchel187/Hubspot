@@ -1393,7 +1393,12 @@ const App = () => {
               onBack={() => handleNavigation('jobs')}
             />
           )}
-          {currentView === 'settings' && <SettingsView />}
+          {currentView === 'settings' && (
+            <SettingsView onAuthSuccess={(portalInfo) => {
+              setIsHubSpotConnected(true);
+              console.log('[App] HubSpot connected:', portalInfo);
+            }} />
+          )}
         </div>
       </div>
     </div>
