@@ -1,6 +1,6 @@
-# 🚀 NOBA ATS Dashboard + HubSpot Integration
+# 🚀 NOBA ATS Dashboard + HubSpot OAuth Integration
 
-Ein vollständiges Applicant Tracking System (ATS) mit React Dashboard und HubSpot CRM Integration für NOBA Experts GmbH.
+Ein vollständiges Applicant Tracking System (ATS) mit React Dashboard und HubSpot OAuth 2.0 Integration für NOBA Experts GmbH.
 
 ## 📋 Features
 
@@ -13,19 +13,26 @@ Ein vollständiges Applicant Tracking System (ATS) mit React Dashboard und HubSp
 - ⚙️ **Settings-Seite** zur API-Key Konfiguration
 - 📤 **CV-Upload** mit KI-gestützter Datenextraktion (Mock)
 
-### HubSpot Integration
-- Sync von Kandidaten als HubSpot Contacts
-- Sync von Jobs als HubSpot Deals
-- Webhook-Support für Echtzeit-Updates
-- Pipeline-Management
+### HubSpot OAuth 2.0 Integration
+- ✅ OAuth 2.0 Authentication Flow
+- ✅ Automatische Token-Refresh
+- ✅ Sync von Kandidaten als HubSpot Contacts
+- ✅ Sync von Jobs als HubSpot Deals
+- ✅ Webhook-Support für Echtzeit-Updates
+- ✅ Pipeline-Management
+- ✅ Multi-Portal Support
 
 ## 🏗️ Projektstruktur
 
 ```
 .
 ├── hsproject.json          # ⚠️ WICHTIG: HubSpot Projektkonfiguration
+├── app.json               # App-Metadaten für HubSpot
+├── hubspot.config.js      # HubSpot Build-Konfiguration
 ├── src/
-│   ├── index.js           # Backend Express Server
+│   ├── index.js           # Backend Express Server mit OAuth
+│   ├── auth/
+│   │   └── oauth.js       # OAuth 2.0 Flow Implementation
 │   ├── api/               # PHP Backend APIs
 │   │   ├── ats-api.php
 │   │   ├── settings-simple.php
@@ -33,6 +40,8 @@ Ein vollständiges Applicant Tracking System (ATS) mit React Dashboard und HubSp
 │   └── dashboard/         # React Frontend
 │       ├── src/
 │       │   ├── App.jsx    # Haupt React Komponente
+│       │   ├── HubSpotOAuth.jsx  # OAuth UI Komponente
+│       │   ├── HubSpotAuth.jsx   # Auth Status Komponente
 │       │   ├── hubspotAPI.js
 │       │   └── ...
 │       ├── package.json
@@ -62,8 +71,12 @@ cp .env.example .env
 
 Bearbeiten Sie `.env`:
 ```env
-HUBSPOT_API_KEY=pat-eu1-xxxxx-xxxxx
+# OAuth 2.0 Configuration
+HUBSPOT_CLIENT_ID=1f511560-e8a1-4e5f-a192-5e960797f9ea
+HUBSPOT_CLIENT_SECRET=your-client-secret-here
+HUBSPOT_REDIRECT_URI=http://localhost:3000/auth/callback
 PORT=3000
+DASHBOARD_URL=http://localhost:5173
 ```
 
 ### 4. Development Server starten
@@ -75,26 +88,29 @@ npm run dev
 - Backend API: http://localhost:3000
 - React Dashboard: http://localhost:5173
 
-## 🔑 HubSpot Setup
+## 🔑 HubSpot OAuth Setup
 
-### 1. Private App erstellen
-1. Gehen Sie zu: https://app.hubspot.com/
-2. Settings → Integrations → Private Apps
-3. "Create a private app"
-4. Name: "NOBA ATS Integration"
+### 1. Public App erstellen (für OAuth)
+1. Gehen Sie zu: https://developers.hubspot.com/
+2. Create an app → "NOBA ATS Integration"
+3. App ID: `1f511560-e8a1-4e5f-a192-5e960797f9ea`
 
-### 2. Erforderliche Scopes
+### 2. OAuth Konfiguration
+1. Auth → OAuth
+2. Redirect URL hinzufügen: `http://localhost:3000/auth/callback`
+3. Install URL: `http://localhost:3000/auth/connect`
+
+### 3. Erforderliche Scopes
 - `crm.objects.contacts.read`
 - `crm.objects.contacts.write`
 - `crm.objects.companies.read`
 - `crm.objects.companies.write`
 - `crm.objects.deals.read`
 - `crm.objects.deals.write`
+- `oauth`
 
-### 3. Access Token kopieren
-Kopieren Sie den Token (beginnt mit `pat-`) und fügen Sie ihn in:
-1. `.env` Datei
-2. Dashboard Settings-Seite
+### 4. Client Secret kopieren
+Kopieren Sie das Client Secret und fügen Sie es in die `.env` Datei ein
 
 ## 📱 Dashboard Verwendung
 
@@ -115,12 +131,13 @@ Kopieren Sie den Token (beginnt mit `pat-`) und fügen Sie ihn in:
    - Eingestellt
    - Abgelehnt
 
-### HubSpot Sync
+### HubSpot OAuth Verbindung
 1. Gehen Sie zu "Einstellungen"
-2. Geben Sie Ihren HubSpot API Key ein
-3. Testen Sie die Verbindung
-4. Aktivieren Sie "HubSpot Sync"
-5. Der Sync-Button erscheint bei Kandidaten
+2. Klicken Sie auf "Mit HubSpot verbinden"
+3. Autorisieren Sie die App in HubSpot
+4. Sie werden zurück zum Dashboard geleitet
+5. Die Verbindung ist hergestellt!
+6. Tokens werden automatisch verwaltet und erneuert
 
 ## 🛠️ Build für Production
 
@@ -137,11 +154,18 @@ Die gebauten Dateien befinden sich in:
 
 ## 📡 API Endpoints
 
+### OAuth Endpoints
+- `GET /auth/connect` - OAuth Flow starten
+- `GET /auth/callback` - OAuth Callback Handler
+- `GET /auth/status` - Auth Status prüfen
+- `POST /auth/refresh` - Token erneuern
+- `POST /auth/disconnect` - Verbindung trennen
+
 ### Backend APIs (Express)
-- `GET /api/contacts` - HubSpot Kontakte abrufen
-- `POST /api/contacts` - Neuen Kontakt erstellen
-- `GET /api/deals` - HubSpot Deals abrufen
-- `POST /api/deals` - Neues Deal erstellen
+- `GET /api/contacts` - HubSpot Kontakte abrufen (OAuth)
+- `POST /api/contacts` - Neuen Kontakt erstellen (OAuth)
+- `GET /api/deals` - HubSpot Deals abrufen (OAuth)
+- `POST /api/deals` - Neues Deal erstellen (OAuth)
 - `POST /api/webhook` - HubSpot Webhook Empfänger
 
 ### PHP APIs (für lokale Datenbank)
@@ -156,10 +180,11 @@ Die gebauten Dateien befinden sich in:
 
 ## 🐛 Troubleshooting
 
-### HubSpot Verbindung schlägt fehl
-- Prüfen Sie, ob der API Key mit `pat-` beginnt
-- Stellen Sie sicher, dass die Private App aktiv ist
-- Überprüfen Sie die Scopes
+### HubSpot OAuth Verbindung schlägt fehl
+- Prüfen Sie das Client Secret in `.env`
+- Stellen Sie sicher, dass die Redirect URL korrekt ist
+- Überprüfen Sie die Scopes in der HubSpot App
+- Backend Server muss auf Port 3000 laufen
 
 ### Dashboard lädt nicht
 ```bash
