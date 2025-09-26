@@ -1,8 +1,6 @@
 {
-  "runtime": "nodejs18.x",
-  "version": "1.0",
   "appFunctions": {
-    "oauth-callback": {
+    "oauthCallback": {
       "file": "oauth-callback.js",
       "secrets": []
     }
