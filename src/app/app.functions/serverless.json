@@ -1,14 +1,10 @@
 {
   "runtime": "nodejs18.x",
   "version": "1.0",
-  "environment": {},
-  "secrets": [
-    "HUBSPOT_CLIENT_SECRET"
-  ],
-  "endpoints": {
+  "appFunctions": {
     "oauth-callback": {
-      "method": "GET",
-      "file": "oauth-callback.js"
+      "file": "oauth-callback.js",
+      "secrets": []
     }
   }
 }

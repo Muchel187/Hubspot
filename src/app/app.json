@@ -5,21 +5,8 @@
   "scopes": [
     "crm.objects.contacts.read",
     "crm.objects.contacts.write",
-    "crm.objects.companies.read",
-    "crm.objects.companies.write",
     "crm.objects.deals.read",
     "crm.objects.deals.write"
   ],
-  "public": false,
-  "extensions": {
-    "crm": {
-      "cards": []
-    }
-  },
-  "auth": {
-    "redirectUrls": [
-      "http://localhost:3000/auth/callback",
-      "https://noba-experts.de/auth/callback"
-    ]
-  }
+  "public": false
 }
