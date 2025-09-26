@@ -1,24 +1,5 @@
 {
   "name": "NOBA ATS Integration",
   "srcDir": "src",
-  "version": "1.0.0",
-  "platformVersion": "2025.1",
-  "description": "HubSpot integration for NOBA Experts ATS Dashboard",
-  "author": "NOBA Experts GmbH",
-  "apiKey": {
-    "hapikey": "",
-    "scopes": [
-      "contacts",
-      "companies",
-      "deals",
-      "engagements",
-      "timeline",
-      "forms",
-      "files"
-    ]
-  },
-  "endpoints": {
-    "webhook": "/api/webhook",
-    "auth": "/api/auth"
-  }
+  "platformVersion": "2025.1"
 }
